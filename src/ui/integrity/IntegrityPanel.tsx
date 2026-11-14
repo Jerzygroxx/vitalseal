@@ -1,13 +1,16 @@
 import { useId, useRef, useState } from 'react'
-import { Copy, RefreshCw, RotateCcw } from 'lucide-react'
+import { Copy, Fingerprint, FlaskConical, RefreshCw, RotateCcw } from 'lucide-react'
 import type { ReportVerification } from '../../crypto/verify'
 import type { TamperKind } from '../../store/integrity-store'
+import { ChainOrbit } from './ChainOrbit'
 import { VerificationResult } from './VerificationResult'
 
 export interface IntegrityPanelProps {
   verification: ReportVerification | null
   sealCode: string | null
   tampered: TamperKind | null
+  /** Opcional: nº de entradas guardadas, para dibujar un nodo por lectura. */
+  entryCount?: number
   /** Demo: simular manipulación. */
   onTamper: (kind: TamperKind) => void
   /** Demo: reiniciar. */
@@ -15,11 +18,6 @@ export interface IntegrityPanelProps {
   /** Volver a verificar. */
   onVerify: () => void
 }
-
-const BUTTON_BASE =
-  'inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 disabled:cursor-not-allowed disabled:opacity-50'
-const SECONDARY_BUTTON = `${BUTTON_BASE} border-slate-600 bg-slate-800 text-slate-100 hover:bg-slate-700`
-const PRIMARY_BUTTON = `${BUTTON_BASE} border-cyan-400/60 bg-cyan-500/15 text-cyan-200 hover:bg-cyan-500/25`
 
 const TAMPER_KINDS = ['alter', 'reorder', 'delete'] as const
 
@@ -45,7 +43,7 @@ function selectText(element: HTMLElement | null) {
 }
 
 /**
- * Panel de integridad (T-03): estado del registro, comprobaciones, código de
+ * Panel de integridad (T-03): estado del registro, cadena de hashes, código de
  * sello y controles de demostración de manipulación.
  * Presentacional puro: recibe el resultado ya calculado y callbacks del padre.
  */
@@ -53,6 +51,7 @@ export function IntegrityPanel({
   verification,
   sealCode,
   tampered,
+  entryCount,
   onTamper,
   onRestore,
   onVerify,
@@ -79,104 +78,116 @@ export function IntegrityPanel({
   }
 
   return (
-    <section
-      aria-labelledby={titleId}
-      className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 text-slate-100"
-    >
-      <h2 id={titleId} className="text-lg font-semibold">
-        Integrity check
-      </h2>
+    <section aria-labelledby={titleId} className="grid gap-5 text-fg lg:grid-cols-12">
+      <div className="glass hud p-5 sm:p-6 lg:col-span-7">
+        <p className="eyebrow">Tamper-evident record</p>
+        <h2 id={titleId} className="mt-1 text-2xl leading-8 font-semibold">
+          Integrity check
+        </h2>
+        <p className="mt-2 max-w-prose text-sm text-fg-muted">
+          Every reading is hashed together with the one before it, and the whole chain is signed.
+          Change, move or remove one entry and the links stop matching.
+        </p>
 
-      <div className="mt-3">
-        <VerificationResult verification={verification} />
+        <div className="mt-4">
+          <ChainOrbit verification={verification} entryCount={entryCount} />
+        </div>
+
+        <div className="mt-5">
+          <VerificationResult verification={verification} />
+        </div>
+
+        {verification === null && (
+          <div className="mt-3">
+            <button type="button" className="btn btn-primary" onClick={onVerify}>
+              <RefreshCw aria-hidden="true" className="size-4" />
+              Verify again
+            </button>
+          </div>
+        )}
       </div>
 
-      {verification === null && (
-        <div className="mt-3">
-          <button type="button" className={PRIMARY_BUTTON} onClick={onVerify}>
-            <RefreshCw aria-hidden="true" className="size-4" />
-            Verify again
-          </button>
-        </div>
-      )}
-
-      <section aria-labelledby={sealTitleId} className="mt-5">
-        <h3 id={sealTitleId} className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Seal code
-        </h3>
-        {sealCode !== null ? (
-          <>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <code
-                ref={codeRef}
-                className="rounded-lg bg-slate-950 px-2.5 py-1.5 font-mono text-sm break-all text-emerald-200"
-              >
-                {sealCode}
-              </code>
-              <button type="button" className={SECONDARY_BUTTON} onClick={handleCopy}>
-                <Copy aria-hidden="true" className="size-4" />
-                Copy seal code
-              </button>
-            </div>
-            <p className="mt-2 max-w-prose text-xs text-slate-400">
-              Send this short code to ground. Any later rewrite of the history produces a
-              different code.
-            </p>
-            {copyStatus !== null && (
-              <p role="status" aria-live="polite" className="mt-1 text-xs text-slate-300">
-                {copyStatus === 'copied'
-                  ? 'Copied to clipboard.'
-                  : 'The code is selected. Press Ctrl+C (Cmd+C on a Mac) to copy it.'}
+      <div className="space-y-5 lg:col-span-5">
+        <section aria-labelledby={sealTitleId} className="glass p-5">
+          <h3 id={sealTitleId} className="eyebrow flex items-center gap-2">
+            <Fingerprint aria-hidden="true" className="size-4 text-ember-300" />
+            Seal code
+          </h3>
+          {sealCode !== null ? (
+            <>
+              <div className="well mt-3 border-ember-300/35 px-4 py-4 text-center">
+                <code
+                  ref={codeRef}
+                  className="num font-mono text-lg leading-8 font-semibold tracking-[0.06em] [overflow-wrap:anywhere] text-ember-200 sm:text-xl"
+                >
+                  {sealCode}
+                </code>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button type="button" className="btn btn-warm" onClick={handleCopy}>
+                  <Copy aria-hidden="true" className="size-4" />
+                  Copy seal code
+                </button>
+                {copyStatus !== null && (
+                  <p role="status" aria-live="polite" className="text-xs text-fg-muted">
+                    {copyStatus === 'copied'
+                      ? 'Copied to clipboard.'
+                      : 'The code is selected. Press Ctrl+C (Cmd+C on a Mac) to copy it.'}
+                  </p>
+                )}
+              </div>
+              <p className="mt-3 max-w-prose text-xs leading-5 text-fg-muted">
+                Send this short code to ground. Any later rewrite of the history produces a
+                different code.
               </p>
-            )}
-          </>
-        ) : (
-          <p className="mt-2 text-sm text-slate-400">No seal code yet.</p>
-        )}
-      </section>
+            </>
+          ) : (
+            <p className="mt-2 text-sm text-fg-muted">No seal code yet.</p>
+          )}
+        </section>
 
-      <section
-        aria-labelledby={demoTitleId}
-        className="mt-5 rounded-lg border border-amber-400/30 bg-amber-500/5 p-3"
-      >
-        <h3 id={demoTitleId} className="text-xs font-semibold uppercase tracking-wide text-amber-300">
-          Demo controls
-        </h3>
-        <p className="mt-1 text-xs text-amber-200/90">
-          Demo only: simulates an attacker editing the stored record.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {TAMPER_KINDS.map((kind) => (
-            <button
-              key={kind}
-              type="button"
-              className={SECONDARY_BUTTON}
-              onClick={() => onTamper(kind)}
-            >
-              {TAMPER_LABELS[kind]}
-            </button>
-          ))}
-          <button
-            type="button"
-            className={SECONDARY_BUTTON}
-            onClick={onRestore}
-            disabled={tampered === null}
-          >
-            <RotateCcw aria-hidden="true" className="size-4" />
-            Restore data
-          </button>
-          <button type="button" className={SECONDARY_BUTTON} onClick={onVerify}>
-            <RefreshCw aria-hidden="true" className="size-4" />
-            Verify again
-          </button>
-        </div>
-        {tampered !== null && (
-          <p className="mt-2 text-xs text-slate-300">
-            Active demo tamper:{' '}
-            <span className="font-semibold">{TAMPER_LABELS[tampered]}</span>
+        <section
+          aria-labelledby={demoTitleId}
+          className="glass border-watch/35 bg-[linear-gradient(180deg,rgb(255_201_77/0.07),transparent_60%),rgb(6_10_20/0.84)] p-5"
+        >
+          <h3 id={demoTitleId} className="eyebrow flex items-center gap-2 text-watch-soft">
+            <FlaskConical aria-hidden="true" className="size-4 text-watch" />
+            Demo controls
+          </h3>
+          <p className="mt-1.5 text-sm text-fg-muted">
+            Demo only: simulates an attacker editing the stored record.
           </p>
-        )}
-      </section>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+            {TAMPER_KINDS.map((kind) => (
+              <button
+                key={kind}
+                type="button"
+                aria-pressed={tampered === kind}
+                className={`btn ${tampered === kind ? 'border-watch bg-watch/14 text-watch-soft' : ''}`}
+                onClick={() => onTamper(kind)}
+              >
+                {TAMPER_LABELS[kind]}
+              </button>
+            ))}
+          </div>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <button type="button" className="btn" onClick={onRestore} disabled={tampered === null}>
+              <RotateCcw aria-hidden="true" className="size-4" />
+              Restore data
+            </button>
+            <button type="button" className="btn" onClick={onVerify}>
+              <RefreshCw aria-hidden="true" className="size-4" />
+              Verify again
+            </button>
+          </div>
+          {tampered !== null && (
+            <p className="mt-3 text-xs text-fg-muted">
+              Active demo tamper:{' '}
+              <span className="font-semibold text-watch-soft">{TAMPER_LABELS[tampered]}</span>
+            </p>
+          )}
+        </section>
+      </div>
     </section>
   )
 }

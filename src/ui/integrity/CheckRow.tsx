@@ -12,14 +12,26 @@ export interface CheckRowProps {
  */
 export function CheckRow({ label, ok }: CheckRowProps) {
   const Icon = ok ? Check : X
-  const tone = ok ? 'text-emerald-300' : 'text-red-300'
 
   return (
-    <li className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
-      <Icon aria-hidden="true" className={`size-4 shrink-0 self-center ${tone}`} />
-      <span className="text-slate-200">{label}</span>
-      <span className={`text-xs font-semibold uppercase tracking-wide ${tone}`}>
-        {ok ? 'Passed' : 'Failed'}
+    <li className="well flex items-center gap-3 px-3 py-2.5">
+      <span
+        aria-hidden="true"
+        className={`flex size-7 shrink-0 items-center justify-center rounded-full border ${
+          ok ? 'border-ok/45 bg-ok/12 text-ok' : 'border-alert/55 bg-alert/14 text-alert'
+        }`}
+      >
+        <Icon className="size-4" strokeWidth={2.5} />
+      </span>
+      <span className="flex min-w-0 flex-col">
+        <span className="text-sm text-fg">{label}</span>
+        <span
+          className={`text-xs font-semibold tracking-[0.1em] uppercase ${
+            ok ? 'text-ok' : 'text-alert'
+          }`}
+        >
+          {ok ? 'Passed' : 'Failed'}
+        </span>
       </span>
     </li>
   )
