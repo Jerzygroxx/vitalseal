@@ -10,3 +10,4 @@
 | 14-nov 12:35 | Claude Code | Claude Sonnet 5.5 | F2: hash chain, firma ECDSA, verificación, vault AES-GCM, código de sello, store de integridad y 26 tests (incl. manipulación) | Jorge (pendiente) |
 | 14-nov 13:05 | OpenCode | DeepSeek (opencode/deepseek-v4.1-flash-free) | T-02: Dashboard, BodyMap, SystemCard y helpers de formato con tests | Claude Code (aprobado) + Jorge (pendiente) |
 | 14-nov 13:20 | Claude Code | Claude Sonnet 5.5 | App.tsx: cableado de formulario, dashboard, selector de distancia y sellado inicial | Jorge (pendiente) |
+| 14-nov 13:40 | OpenCode | DeepSeek (opencode/deepseek-v4.1-flash-free) | T-03: IntegrityPanel, GroundVerifier, CheckRow y summarize con tests | Claude Code (aprobado) + Jorge (pendiente) |
