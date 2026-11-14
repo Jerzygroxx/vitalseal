@@ -11,3 +11,4 @@
 | 14-nov 13:05 | OpenCode | DeepSeek (opencode/deepseek-v4.1-flash-free) | T-02: Dashboard, BodyMap, SystemCard y helpers de formato con tests | Claude Code (aprobado) + Jorge (pendiente) |
 | 14-nov 13:20 | Claude Code | Claude Sonnet 5.5 | App.tsx: cableado de formulario, dashboard, selector de distancia y sellado inicial | Jorge (pendiente) |
 | 14-nov 13:40 | OpenCode | DeepSeek (opencode/deepseek-v4.1-flash-free) | T-03: IntegrityPanel, GroundVerifier, CheckRow y summarize con tests | Claude Code (aprobado) + Jorge (pendiente) |
+| 14-nov 13:50 | Claude Code | Claude Sonnet 5.5 | parse-report (verificador), pestañas Integrity y Ground Control en App.tsx, auditoría G1/G2 | Jorge (pendiente) |

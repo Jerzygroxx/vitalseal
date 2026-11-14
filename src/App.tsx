@@ -4,12 +4,17 @@ import { useAppStore } from './store/app-store'
 import { useIntegrityStore } from './store/integrity-store'
 import { DailyCheckForm } from './ui/daily-check/DailyCheckForm'
 import { Dashboard } from './ui/dashboard/Dashboard'
+import { IntegrityPanel } from './ui/integrity/IntegrityPanel'
+import { GroundVerifier } from './ui/verifier/GroundVerifier'
+import { verifyReportJson } from './crypto/parse-report'
 
-type Tab = 'dashboard' | 'check'
+type Tab = 'dashboard' | 'check' | 'integrity' | 'ground'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'check', label: 'Daily check' },
+  { id: 'integrity', label: 'Integrity' },
+  { id: 'ground', label: 'Ground Control' },
 ]
 
 const DISTANCES: { id: Distance; label: string }[] = [
@@ -23,6 +28,7 @@ export default function App() {
   const { readings, triage, distance, setDistance, addReading, resetDemo } = useAppStore()
   const initIntegrity = useIntegrityStore((s) => s.init)
   const addToChain = useIntegrityStore((s) => s.addReading)
+  const integrity = useIntegrityStore()
 
   // Sella el historial sintético inicial al arrancar la app.
   useEffect(() => {
@@ -108,6 +114,22 @@ export default function App() {
           <Dashboard key={`${triage.generatedAt}-${distance}`} triage={triage} />
         )}
         {tab === 'check' && <DailyCheckForm onSubmit={handleSubmit} />}
+        {tab === 'integrity' && (
+          <IntegrityPanel
+            verification={integrity.verification}
+            sealCode={integrity.code}
+            tampered={integrity.tampered}
+            onTamper={(kind) => void integrity.simulateTamper(kind)}
+            onRestore={() => void integrity.restore()}
+            onVerify={() => void integrity.verify()}
+          />
+        )}
+        {tab === 'ground' && (
+          <GroundVerifier
+            onVerify={verifyReportJson}
+            sampleReportJson={integrity.report ? JSON.stringify(integrity.report, null, 2) : undefined}
+          />
+        )}
         <p className="mt-8 text-xs text-slate-400">
           {readings.length} synthetic demo readings loaded. Not real astronaut data.
         </p>
