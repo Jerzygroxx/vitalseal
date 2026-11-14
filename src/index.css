@@ -1,1 +1,287 @@
 @import "tailwindcss";
+
+/*
+ * VitalSeal design tokens — "Orbital Glass".
+ * Everything visual is defined here so the palette can be retuned in one place.
+ * Tailwind v4 turns each --color-* into utilities (bg-*, text-*, border-*, fill-*, stroke-*).
+ * See docs/reviews/DESIGN-fable.md for what each token is for.
+ */
+@theme {
+  /* Deep space: page background and solid surfaces (darkest -> lightest). */
+  --color-space-950: #02040a;
+  --color-space-900: #060a14;
+  --color-space-800: #0b1220;
+  --color-space-700: #131c2e;
+  --color-space-600: #1f2b43;
+
+  /* Hairlines over glass. */
+  --color-line: rgb(150 180 225 / 0.16);
+  --color-line-strong: rgb(150 180 225 / 0.34);
+
+  /* Text. All three pass 4.5:1 on the glass panels (see design doc). */
+  --color-fg: #eaf0fa;
+  --color-fg-muted: #b6c3d9;
+  --color-fg-dim: #94a5bf;
+
+  /* Primary accent: atmospheric ice-blue (the limb of the Earth). */
+  --color-ice-100: #dcf4fd;
+  --color-ice-200: #bfeafb;
+  --color-ice-300: #8fdbf7;
+  --color-ice-400: #5cc8f0;
+  --color-ice-500: #2aa9dc;
+
+  /* Secondary accent: warm ember (city lights on the night side). */
+  --color-ember-200: #ffe2b8;
+  --color-ember-300: #f9c57f;
+  --color-ember-400: #f2a54e;
+
+  /* Status. Colour-blind-safe trio (bluish green / yellow amber / vermilion),
+     always paired with a glyph, a fill pattern and text. */
+  --color-ok: #3ddbb4;
+  --color-ok-soft: #a8f0dd;
+  --color-watch: #ffc94d;
+  --color-watch-soft: #ffe6a3;
+  --color-alert: #ff7b61;
+  --color-alert-soft: #ffc4b8;
+  --color-nodata: #94a5bf;
+
+  /* Type: system stacks only (the app must work offline, no web fonts). */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI",
+    Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+  --font-display: "Segoe UI Variable Display", "SF Pro Display", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Cascadia Code", "JetBrains Mono",
+    Menlo, Consolas, "Liberation Mono", monospace;
+
+  --radius-panel: 1.125rem;
+
+  --animate-twinkle: twinkle 6s ease-in-out infinite alternate;
+  --animate-drift: drift 140s ease-in-out infinite alternate;
+  --animate-signal: signal 3.2s linear infinite;
+  --animate-scan: scan 7s ease-in-out infinite;
+  --animate-rise: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-halo: halo 90s linear infinite;
+  --animate-breathe: breathe 5s ease-in-out infinite alternate;
+
+  @keyframes twinkle {
+    from { opacity: 0.25; }
+    to { opacity: 1; }
+  }
+  @keyframes drift {
+    from { transform: rotate(-0.5deg) scale(1.05); }
+    to { transform: rotate(0.5deg) scale(1.05); }
+  }
+  @keyframes signal {
+    from { left: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    to { left: 100%; opacity: 0; }
+  }
+  @keyframes scan {
+    0%, 100% { transform: translateY(0); opacity: 0; }
+    10% { opacity: 0.7; }
+    50% { transform: translateY(var(--scan-travel, 380px)); opacity: 0.7; }
+    60% { opacity: 0; }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes halo {
+    to { stroke-dashoffset: -280; }
+  }
+  @keyframes breathe {
+    from { opacity: 0.55; }
+    to { opacity: 1; }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-space-950);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    color: var(--color-fg);
+    background: var(--color-space-950);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ice-200);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: rgb(92 200 240 / 0.35);
+  }
+}
+
+@layer components {
+  /* Layered dark glass: every piece of content sits on one of these, never
+     directly on the illustrated backdrop. */
+  .glass {
+    position: relative;
+    border-radius: var(--radius-panel);
+    border: 1px solid var(--color-line);
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.03), transparent 38%),
+      rgb(6 10 20 / 0.84);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.05),
+      0 24px 60px -28px rgb(0 0 0 / 0.75);
+    -webkit-backdrop-filter: blur(18px) saturate(1.25);
+    backdrop-filter: blur(18px) saturate(1.25);
+  }
+  /* Nested surface inside a glass panel. */
+  .well {
+    border-radius: 0.875rem;
+    border: 1px solid var(--color-line);
+    background: rgb(2 4 10 / 0.5);
+  }
+  /* HUD corner brackets (decorative). */
+  .hud::before,
+  .hud::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--color-ice-400);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  .hud::before {
+    top: -1px;
+    left: -1px;
+    border-right: 0;
+    border-bottom: 0;
+    border-top-left-radius: var(--radius-panel);
+  }
+  .hud::after {
+    right: -1px;
+    bottom: -1px;
+    border-left: 0;
+    border-top: 0;
+    border-bottom-right-radius: var(--radius-panel);
+  }
+
+  .eyebrow {
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-fg-dim);
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-line-strong);
+    background: rgb(19 28 46 / 0.85);
+    padding: 0.5rem 0.875rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: var(--color-fg);
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  }
+  .btn:hover:not(:disabled) {
+    background: rgb(31 43 67 / 0.95);
+    border-color: var(--color-ice-400);
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .btn-primary {
+    border-color: var(--color-ice-300);
+    background: linear-gradient(180deg, var(--color-ice-300), var(--color-ice-400));
+    color: var(--color-space-950);
+    font-weight: 650;
+    box-shadow: 0 0 0 1px rgb(143 219 247 / 0.2), 0 10px 30px -12px rgb(92 200 240 / 0.7);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(180deg, var(--color-ice-200), var(--color-ice-300));
+    border-color: var(--color-ice-100);
+  }
+  .btn-warm:hover:not(:disabled) {
+    border-color: var(--color-ember-300);
+  }
+
+  .field {
+    display: block;
+    width: 100%;
+    min-height: 2.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-line-strong);
+    background: rgb(2 4 10 / 0.6);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9375rem;
+    line-height: 1.5rem;
+    color: var(--color-fg);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field::placeholder {
+    color: var(--color-fg-dim);
+  }
+  .field:hover {
+    border-color: var(--color-ice-400);
+  }
+  .field:focus-visible {
+    outline: none;
+    border-color: var(--color-ice-200);
+    box-shadow: 0 0 0 3px rgb(92 200 240 / 0.35);
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--color-alert);
+  }
+  .field[aria-invalid="true"]:focus-visible {
+    box-shadow: 0 0 0 3px rgb(255 123 97 / 0.4);
+  }
+
+  .skip-link {
+    position: absolute;
+    left: 0.75rem;
+    top: -4rem;
+    z-index: 60;
+    border-radius: 0.5rem;
+    background: var(--color-ice-300);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-space-950);
+  }
+  .skip-link:focus {
+    top: 0.75rem;
+  }
+}
+
+/* Motion is decorative everywhere: switch it all off when the user asks. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

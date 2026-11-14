@@ -1,6 +1,9 @@
 import { useId, useState } from 'react'
+import { FileJson, RadioTower, ShieldCheck } from 'lucide-react'
 import type { ReportVerification } from '../../crypto/verify'
+import { ChainOrbit } from '../integrity/ChainOrbit'
 import { VerificationResult } from '../integrity/VerificationResult'
+import { entryCountOf } from '../integrity/chain-layout'
 
 export type VerifyOutcome =
   | { kind: 'result'; verification: ReportVerification }
@@ -12,10 +15,11 @@ export interface GroundVerifierProps {
   sampleReportJson?: string
 }
 
-const BUTTON_BASE =
-  'inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 disabled:cursor-not-allowed disabled:opacity-50'
-const SECONDARY_BUTTON = `${BUTTON_BASE} border-slate-600 bg-slate-800 text-slate-100 hover:bg-slate-700`
-const PRIMARY_BUTTON = `${BUTTON_BASE} border-cyan-400/60 bg-cyan-500/15 text-cyan-200 hover:bg-cyan-500/25`
+const STEPS = [
+  'Paste the signed report received from the crew.',
+  'Run the verification. Nothing leaves this page.',
+  'Read the result: chain, seal and signature.',
+]
 
 /**
  * Vista "Ground Control Verifier" (T-03): pega un reporte firmado recibido de
@@ -27,12 +31,15 @@ export function GroundVerifier({ onVerify, sampleReportJson }: GroundVerifierPro
   const inputId = useId()
   const [reportJson, setReportJson] = useState('')
   const [outcome, setOutcome] = useState<VerifyOutcome | null>(null)
+  /** Nº de entradas del reporte verificado (solo para dibujar la cadena). */
+  const [entryCount, setEntryCount] = useState<number | undefined>(undefined)
   const [pending, setPending] = useState(false)
 
   async function handleVerify() {
     setPending(true)
     try {
       setOutcome(await onVerify(reportJson))
+      setEntryCount(entryCountOf(reportJson))
     } catch (error) {
       setOutcome({
         kind: 'error',
@@ -47,40 +54,48 @@ export function GroundVerifier({ onVerify, sampleReportJson }: GroundVerifierPro
   }
 
   return (
-    <section aria-labelledby={titleId} className="mx-auto w-full max-w-3xl space-y-4 text-slate-100">
-      <header>
-        <h2 id={titleId} className="text-lg font-semibold">
-          Ground Control Verifier
-        </h2>
-        <p className="mt-1 text-sm text-slate-400">
-          Paste a signed report received from the crew. This page checks the hash chain and
-          the signature; it does not need the crew&apos;s device.
-        </p>
+    <section aria-labelledby={titleId} className="grid gap-5 text-fg lg:grid-cols-2">
+      <header className="glass hud flex items-start gap-4 p-5 sm:p-6 lg:col-span-2">
+        <span
+          aria-hidden="true"
+          className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-ice-300/40 bg-ice-400/12 text-ice-200"
+        >
+          <RadioTower className="size-5.5" />
+        </span>
+        <div>
+          <p className="eyebrow">Independent check on the ground</p>
+          <h2 id={titleId} className="mt-1 text-2xl leading-8 font-semibold">
+            Ground Control Verifier
+          </h2>
+          <p className="mt-2 max-w-prose text-sm text-fg-muted">
+            Paste a signed report received from the crew. This page checks the hash chain and
+            the signature; it does not need the crew&apos;s device.
+          </p>
+        </div>
       </header>
 
-      <div>
-        <label
-          htmlFor={inputId}
-          className="block text-xs font-semibold uppercase tracking-wide text-slate-400"
-        >
+      <div className="glass p-5">
+        <label htmlFor={inputId} className="eyebrow flex items-center gap-2">
+          <FileJson aria-hidden="true" className="size-4 text-ice-300" />
           Signed report (JSON)
         </label>
         <textarea
           id={inputId}
           value={reportJson}
           onChange={(event) => setReportJson(event.target.value)}
-          rows={8}
+          rows={14}
           spellCheck={false}
-          className="mt-2 w-full rounded-lg border border-slate-600 bg-slate-950 p-3 font-mono text-xs text-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
+          className="field mt-3 resize-y font-mono text-xs leading-5"
         />
-        <div className="mt-2 flex flex-wrap gap-2">
-          <button type="button" className={PRIMARY_BUTTON} onClick={handleVerify} disabled={pending}>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button type="button" className="btn btn-primary" onClick={handleVerify} disabled={pending}>
+            <ShieldCheck aria-hidden="true" className="size-4" />
             {pending ? 'Verifying…' : 'Verify report'}
           </button>
           {sampleReportJson !== undefined && (
             <button
               type="button"
-              className={SECONDARY_BUTTON}
+              className="btn"
               onClick={() => setReportJson(sampleReportJson)}
               disabled={pending}
             >
@@ -90,17 +105,42 @@ export function GroundVerifier({ onVerify, sampleReportJson }: GroundVerifierPro
         </div>
       </div>
 
-      {outcome?.kind === 'error' && (
-        <div
-          role="alert"
-          className="rounded-xl border border-red-400/40 bg-red-500/15 p-3 text-sm text-red-200"
-        >
-          <p className="font-semibold">Could not verify the report</p>
-          <p className="mt-1 break-words">{outcome.message}</p>
-        </div>
-      )}
+      <div className="glass p-5">
+        <p className="eyebrow">Result</p>
 
-      {outcome?.kind === 'result' && <VerificationResult verification={outcome.verification} />}
+        {outcome === null && (
+          <ol className="mt-3 space-y-3">
+            {STEPS.map((step, index) => (
+              <li key={step} className="flex items-start gap-3 text-sm text-fg-muted">
+                <span
+                  aria-hidden="true"
+                  className="num flex size-7 shrink-0 items-center justify-center rounded-full border border-line-strong font-mono text-xs font-semibold text-ice-200"
+                >
+                  {index + 1}
+                </span>
+                <span className="pt-1">{step}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        {outcome?.kind === 'error' && (
+          <div
+            role="alert"
+            className="mt-3 rounded-2xl border border-alert/55 bg-alert/14 p-4 text-sm text-alert-soft"
+          >
+            <p className="font-semibold">Could not verify the report</p>
+            <p className="mt-1 break-words text-fg">{outcome.message}</p>
+          </div>
+        )}
+
+        {outcome?.kind === 'result' && (
+          <div className="mt-3 space-y-4">
+            <VerificationResult verification={outcome.verification} />
+            <ChainOrbit verification={outcome.verification} entryCount={entryCount} />
+          </div>
+        )}
+      </div>
     </section>
   )
 }
