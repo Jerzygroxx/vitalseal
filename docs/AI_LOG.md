@@ -13,3 +13,4 @@
 | 14-nov 13:40 | OpenCode | DeepSeek (opencode/deepseek-v4.1-flash-free) | T-03: IntegrityPanel, GroundVerifier, CheckRow y summarize con tests | Claude Code (aprobado) + Jorge (pendiente) |
 | 14-nov 13:50 | Claude Code | Claude Sonnet 5.5 | parse-report (verificador), pestañas Integrity y Ground Control en App.tsx, auditoría G1/G2 | Jorge (pendiente) |
 | 14-nov 14:25 | Claude Code (subagente de diseño) | Fable | Rediseño visual completo: tokens, fondo de la Tierra generativo (Canvas 2D), body map, órbita de integridad, layout. Dirección creativa: Jorge. Imagen de referencia solo para estilo | Claude Code (verificado: 96 tests, build) + Jorge (pendiente) |
+| 14-nov 15:50 | Claude Code + Fable (subagente de diseño) | Claude Sonnet 5.5 / Fable | Rama experimental de rediseño simplificado y sensor-primero: probada y DESCARTADA por Jorge (no se integró código) | Jorge |
