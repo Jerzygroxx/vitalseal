@@ -14,6 +14,8 @@ VitalSeal is a research prototype, not a medical device. This page states what i
 
 No secret is stored in the repository, and no key or passphrase is stored in `localStorage` in clear.
 
+Note: the AES-GCM vault is implemented and unit-tested as a module, but it is not yet connected to the interface. The demo app keeps data in memory only and creates a new signing key in each session.
+
 ## What the tests prove
 
 `src/crypto/crypto.test.ts` and `src/store/integrity-store.test.ts` check that verification fails when a reading is altered, entries are reordered, an entry is deleted, a signature comes from another key, the report tail is truncated, or the head hash is rewritten after truncation. They also check that a wrong passphrase or modified ciphertext cannot open the vault.
