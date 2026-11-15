@@ -3,10 +3,10 @@ import type { MetricKey, SystemId } from './types'
 /**
  * Tabla de umbrales. Cada fila lleva su fuente para el gate G-Calidad.
  *
- * IMPORTANTE: `verified: false` = valor de referencia clínica general, pendiente
- * de contrastar con el NASA HRP Evidence Report / NASA-STD-3001 correspondiente
- * antes de la entrega. No presentar como umbral NASA hasta que sea `true`.
- * Es un prototipo de investigación, no un dispositivo médico.
+ * IMPORTANT: `verified: false` = general clinical reference value (or an
+ * illustrative prototype level, for radiation), not checked against a NASA
+ * standard. Do not present it as a NASA threshold unless it becomes `true`.
+ * This is a research prototype, not a medical device.
  */
 export interface Threshold {
   metric: MetricKey
@@ -57,7 +57,7 @@ export const THRESHOLDS: Threshold[] = [
     useBaseline: true, source: REF('risk-of-behavioral-changes-and-psychiatric-disorders'), verified: false },
   { metric: 'radiationDose', system: 'radiation', label: 'Cumulative dose', unit: 'mSv',
     amberLow: 0, amberHigh: 400, redLow: 0, redHigh: 600, amberZ: 99, redZ: 99,
-    useBaseline: false, source: `Rationale: NASA HRP ${HRP}risk-of-radiation-induced-cancers/ . Value 600 mSv = NASA-STD-3001 V1 career limit as reported in secondary results; primary PDF NOT yet verified.`, verified: false },
+    useBaseline: false, source: `Rationale: NASA HRP ${HRP}risk-of-radiation-induced-cancers/ . The 400 and 600 mSv levels are illustrative prototype values, not NASA limits.`, verified: false },
 ]
 
 export const SYSTEM_LABELS: Record<SystemId, string> = {

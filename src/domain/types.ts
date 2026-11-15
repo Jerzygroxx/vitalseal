@@ -1,6 +1,6 @@
 /**
- * Contrato de tipos congelado (F0). Cambios solo vía el orquestador.
- * Combina AGENTS.md §6 (triage) y ORCHESTRATION.md §4 (confianza).
+ * Frozen type contract shared by the decision engine, the crypto layer and the UI.
+ * Covers triage (readings, baselines, system status) and trust (hash chain, signed report).
  */
 
 export type SystemId = 'neuro' | 'cardio' | 'metabolic' | 'musculoskeletal' | 'radiation'

@@ -4,7 +4,7 @@
  * VitalSeal design tokens — "Orbital Glass".
  * Everything visual is defined here so the palette can be retuned in one place.
  * Tailwind v4 turns each --color-* into utilities (bg-*, text-*, border-*, fill-*, stroke-*).
- * See docs/reviews/DESIGN-fable.md for what each token is for.
+ * Each token is named for its role (surface, text, accent, status).
  */
 @theme {
   /* Deep space: page background and solid surfaces (darkest -> lightest). */
