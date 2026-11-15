@@ -1,5 +1,5 @@
 # Dependencies
-node_modules/
+node_modules
 .pnp
 .pnp.js
 
@@ -48,3 +48,8 @@ deck/qa/
 
 # Misc
 *.tsbuildinfo
+
+# Local tooling (not part of the project)
+*.code-workspace
+.claude/
+.opencode/
