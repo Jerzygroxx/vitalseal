@@ -7,10 +7,36 @@ Challenge: *Create Health Monitoring Software for Astronauts on Space Missions*
 
 > **Research prototype. Not a medical device. Not clinically validated.** It gives no medical advice. This project is not affiliated with, endorsed by, or sponsored by NASA.
 
-- **Live app:** https://vitalseal-space-exploit.netlify.app (no sign-up, works offline after the first load)
-- **Threat model:** [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md)
-- **AI use log:** [`docs/AI_LOG.md`](docs/AI_LOG.md)
-- **Sources and licenses:** [`docs/REFERENCES.md`](docs/REFERENCES.md)
+<p align="center">
+  <a href="https://vitalseal-space-exploit.netlify.app"><img src="docs/images/home-screen.jpg" alt="VitalSeal home screen: the question 'How do you feel today?', three big answers (I'm fine, Something feels off, Emergency) and the crew status with a body map" width="860"></a>
+</p>
+
+<p align="center">
+  <a href="https://vitalseal-space-exploit.netlify.app"><b>Live app</b></a> ·
+  <a href="https://drive.google.com/file/d/1AcOQtQ6KMPJQVpX6dxapFNL8ZvzIltfx/view?usp=sharing"><b>Demo video (30 s)</b></a> ·
+  <a href="docs/THREAT_MODEL.md">Threat model</a> ·
+  <a href="docs/AI_LOG.md">AI use log</a> ·
+  <a href="docs/REFERENCES.md">Sources and licenses</a>
+</p>
+
+The live app needs no sign-up and works offline after the first load. Screenshots show the live prototype with synthetic data. Illustrations are generated artwork made with AI assistance.
+
+### A quick look
+
+<table>
+  <tr>
+    <td width="34%" align="center" valign="top">
+      <img src="docs/images/emergency-steps.jpg" alt="Emergency steps for a heart, blood pressure or oxygen problem, with the time each ticked step was done" width="250"><br>
+      <sub><b>Act:</b> short steps for the affected body system. Each tick keeps its time.</sub>
+    </td>
+    <td width="66%" align="center" valign="top">
+      <img src="docs/images/integrity-tamper.jpg" alt="Integrity tab showing 'Tampering detected' and the hash chain breaking at entry 10" width="520"><br>
+      <sub><b>Trust:</b> edit one entry and the hash chain breaks at that point.</sub><br><br>
+      <img src="docs/images/ground-control.jpg" alt="Ground Control tab verifying a signed report as 'Record intact'" width="520"><br>
+      <sub><b>Verify:</b> ground checks the signed report on its own, without the crew's device.</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
