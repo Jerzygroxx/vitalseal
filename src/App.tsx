@@ -199,7 +199,7 @@ export default function App() {
           </div>
         </section>
 
-        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[76rem] flex-1 px-4 py-5 outline-none sm:px-6">
+        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[76rem] flex-1 px-4 py-5 outline-none sm:px-6 md:scroll-mt-32">
           <div key={tab} className="motion-safe:animate-rise">
             {tab === 'home' && <HomeFlow />}
             {tab === 'details' && triage && (
