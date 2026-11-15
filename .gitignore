@@ -48,3 +48,8 @@ deck/qa/
 
 # Misc
 *.tsbuildinfo
+
+# Local tooling (not part of the project)
+*.code-workspace
+.claude/
+.opencode/
