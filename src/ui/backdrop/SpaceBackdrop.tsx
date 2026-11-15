@@ -71,11 +71,14 @@ export function SpaceBackdrop({ distance }: SpaceBackdropProps) {
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined
     let last = measure()
-    setFrame(last)
+    // A hidden page or background tab can report a 0x0 viewport: painting then throws and
+    // would take the whole app down, so wait for a real size instead.
+    setFrame(last.w > 0 && last.h > 0 ? last : null)
     const onResize = () => {
       if (timer !== undefined) clearTimeout(timer)
       timer = setTimeout(() => {
         const next = measure()
+        if (next.w <= 0 || next.h <= 0) return
         const sameWidth = next.w === last.w
         const smallHeightChange = Math.abs(next.h - last.h) < 140 * next.scale
         if (sameWidth && smallHeightChange && next.focus?.y === last.focus?.y) return

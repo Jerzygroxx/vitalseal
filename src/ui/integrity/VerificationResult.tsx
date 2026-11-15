@@ -5,26 +5,35 @@ import { summarize, type SummaryTone } from './summary'
 
 interface ToneStyle {
   icon: LucideIcon
-  /** Borde + fondo + texto: el color nunca es el único indicador (hay icono y texto). */
-  classes: string
+  /** Card: border + tint. Colour is never the only signal (icon shape + text). */
+  card: string
+  /** Icon badge: a different shape per verdict (circle / octagon / dashed circle). */
+  badge: string
+  title: string
   note: string
 }
 
 const TONE_STYLES: Record<SummaryTone, ToneStyle> = {
   ok: {
     icon: ShieldCheck,
-    classes: 'border-ok/45 bg-ok/12 text-ok-soft',
-    note: 'The record matches its signed seal.',
+    card: 'border-ok/50 bg-ok/10',
+    badge: 'rounded-full bg-ok text-space-950',
+    title: 'text-ok-soft',
+    note: 'Nothing was changed since it was sealed.',
   },
   bad: {
     icon: ShieldX,
-    classes: 'border-alert/55 bg-alert/14 text-alert-soft',
-    note: 'The record no longer matches its signed seal.',
+    card: 'border-alert/60 bg-alert/12',
+    badge: 'ig-octagon bg-alert text-space-950',
+    title: 'text-alert-soft',
+    note: 'The record no longer matches its signed seal. Do not rely on it.',
   },
   unknown: {
     icon: ShieldQuestionMark,
-    classes: 'border-line-strong bg-space-700/60 text-fg-muted',
-    note: 'Run a verification to compare the record with its seal.',
+    card: 'border-line-strong bg-space-700/50',
+    badge: 'rounded-full border-2 border-dashed border-line-strong text-fg-muted',
+    title: 'text-fg',
+    note: 'Run a check to compare the record with its seal.',
   },
 }
 
@@ -33,13 +42,14 @@ export interface VerificationResultProps {
 }
 
 /**
- * Bloque de resultado compartido por `IntegrityPanel` y `GroundVerifier` (T-03):
- * banner con icono + texto + color, las tres comprobaciones y los problemas.
- * Presentacional puro: solo lee el resultado que ya calculó el verificador.
+ * Shared result block for `IntegrityPanel` and `GroundVerifier`: one big verdict
+ * (shaped icon + plain words + colour), the three checks and any problems.
+ * Presentation only: it reads what the verifier already computed.
  */
 export function VerificationResult({ verification }: VerificationResultProps) {
   const summary = summarize(verification)
-  const { icon: Icon, classes, note } = TONE_STYLES[summary.tone]
+  const tone = TONE_STYLES[summary.tone]
+  const Icon = tone.icon
   const problems = verification?.problems ?? []
   const brokenAt = verification?.chain.brokenAt
 
@@ -48,12 +58,21 @@ export function VerificationResult({ verification }: VerificationResultProps) {
       <div
         role="status"
         aria-live="polite"
-        className={`flex items-center gap-3.5 rounded-2xl border px-4 py-3.5 ${classes}`}
+        className={`flex items-center gap-4 rounded-3xl border p-4 sm:gap-5 sm:p-5 ${tone.card}`}
       >
-        <Icon aria-hidden="true" className="size-9 shrink-0" strokeWidth={1.6} />
+        <span
+          aria-hidden="true"
+          className={`flex size-16 shrink-0 items-center justify-center sm:size-20 ${tone.badge}`}
+        >
+          <Icon className="size-9 sm:size-11" strokeWidth={2} />
+        </span>
         <div className="min-w-0">
-          <p className="font-display text-xl leading-7 font-semibold">{summary.title}</p>
-          <p className="text-sm text-fg-muted">{note}</p>
+          <p
+            className={`font-display text-[1.75rem] leading-8 font-semibold tracking-tight text-balance sm:text-4xl sm:leading-10 ${tone.title}`}
+          >
+            {summary.title}
+          </p>
+          <p className="mt-1 text-sm leading-5 text-fg-muted sm:text-base sm:leading-6">{tone.note}</p>
         </div>
       </div>
 
@@ -66,7 +85,7 @@ export function VerificationResult({ verification }: VerificationResultProps) {
       )}
 
       {brokenAt !== undefined && (
-        <p className="text-sm text-fg-muted">
+        <p className="text-sm text-fg-muted sm:text-base">
           First inconsistent entry:{' '}
           <span className="num font-mono font-semibold text-fg">#{brokenAt}</span>
         </p>
@@ -79,7 +98,7 @@ export function VerificationResult({ verification }: VerificationResultProps) {
             {problems.map((problem) => (
               <li key={problem} className="flex gap-2">
                 <span aria-hidden="true" className="mt-[0.45rem] size-1.5 shrink-0 rotate-45 bg-alert" />
-                <span>{problem}</span>
+                <span className="min-w-0 [overflow-wrap:anywhere]">{problem}</span>
               </li>
             ))}
           </ul>

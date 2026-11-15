@@ -1,7 +1,8 @@
-import { useId, useState } from 'react'
-import { FileJson, RadioTower, ShieldCheck } from 'lucide-react'
+import { useId, useRef, useState, type ChangeEvent } from 'react'
+import { FileUp, FlaskConical, RadioTower, ShieldCheck, WifiOff } from 'lucide-react'
 import type { ReportVerification } from '../../crypto/verify'
 import { ChainOrbit } from '../integrity/ChainOrbit'
+import { StepCard } from '../integrity/StepCard'
 import { VerificationResult } from '../integrity/VerificationResult'
 import { entryCountOf } from '../integrity/chain-layout'
 
@@ -15,25 +16,40 @@ export interface GroundVerifierProps {
   sampleReportJson?: string
 }
 
-const STEPS = [
-  'Paste the signed report received from the crew.',
-  'Run the verification. Nothing leaves this page.',
-  'Read the result: chain, seal and signature.',
-]
-
 /**
- * Vista "Ground Control Verifier" (T-03): pega un reporte firmado recibido de
- * la tripulación y compruébalo sin necesidad de su dispositivo.
- * Presentacional puro: la verificación la hace `onVerify` (crypto/store).
+ * Ground Control tab (T-03, redesigned in T-08): get the signed report (file or
+ * paste), verify it, read one big verdict. It does not need the crew's device.
+ * Presentation only: the verification itself is done by `onVerify` (crypto/store).
  */
 export function GroundVerifier({ onVerify, sampleReportJson }: GroundVerifierProps) {
   const titleId = useId()
   const inputId = useId()
+  const fileRef = useRef<HTMLInputElement | null>(null)
+  const resultRef = useRef<HTMLDivElement | null>(null)
   const [reportJson, setReportJson] = useState('')
+  const [source, setSource] = useState<string | null>(null)
   const [outcome, setOutcome] = useState<VerifyOutcome | null>(null)
-  /** Nº de entradas del reporte verificado (solo para dibujar la cadena). */
+  /** Entries in the verified report (only used to draw the chain). */
   const [entryCount, setEntryCount] = useState<number | undefined>(undefined)
   const [pending, setPending] = useState(false)
+
+  const empty = reportJson.trim() === ''
+
+  /** Reads the chosen .json file into the textarea. Nothing is uploaded. */
+  function handleFile(event: ChangeEvent<HTMLInputElement>) {
+    const input = event.target
+    const file = input.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      setReportJson(typeof reader.result === 'string' ? reader.result : '')
+      setSource(`Loaded ${file.name}.`)
+    }
+    reader.onerror = () => setSource(`Could not read ${file.name}. Paste the report instead.`)
+    reader.readAsText(file)
+    // Allow picking the same file again.
+    input.value = ''
+  }
 
   async function handleVerify() {
     setPending(true)
@@ -50,96 +66,158 @@ export function GroundVerifier({ onVerify, sampleReportJson }: GroundVerifierPro
       })
     } finally {
       setPending(false)
+      // On a phone the result is below the button: bring it into view.
+      resultRef.current?.scrollIntoView({ block: 'nearest' })
     }
   }
 
   return (
-    <section aria-labelledby={titleId} className="grid gap-5 text-fg lg:grid-cols-2">
-      <header className="glass hud flex items-start gap-4 p-5 sm:p-6 lg:col-span-2">
+    <section aria-labelledby={titleId} className="grid gap-4 text-fg sm:gap-5 lg:grid-cols-2">
+      <header className="glass hud flex items-center gap-4 p-4 sm:p-6 lg:col-span-2">
         <span
           aria-hidden="true"
-          className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-ice-300/40 bg-ice-400/12 text-ice-200"
+          className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-ice-300/40 bg-ice-400/12 text-ice-200 sm:size-16"
         >
-          <RadioTower className="size-5.5" />
+          <RadioTower className="size-7 sm:size-8" />
         </span>
-        <div>
-          <p className="eyebrow">Independent check on the ground</p>
-          <h2 id={titleId} className="mt-1 text-2xl leading-8 font-semibold">
-            Ground Control Verifier
+        <div className="min-w-0">
+          <p className="text-base font-medium text-ice-200 sm:text-lg">Ground Control</p>
+          <h2
+            id={titleId}
+            className="mt-0.5 text-[1.75rem] leading-8 font-semibold tracking-tight text-balance sm:text-4xl sm:leading-10"
+          >
+            Check the crew&rsquo;s report
           </h2>
-          <p className="mt-2 max-w-prose text-sm text-fg-muted">
-            Paste a signed report received from the crew. This page checks the hash chain and
-            the signature; it does not need the crew&apos;s device.
+          <p className="mt-1.5 flex items-center gap-2 text-sm leading-5 text-fg-muted sm:text-base">
+            <WifiOff aria-hidden="true" className="size-4 shrink-0 text-ice-300" />
+            Runs on this page. Nothing is uploaded.
           </p>
         </div>
       </header>
 
-      <div className="glass p-5">
-        <label htmlFor={inputId} className="eyebrow flex items-center gap-2">
-          <FileJson aria-hidden="true" className="size-4 text-ice-300" />
-          Signed report (JSON)
-        </label>
-        <textarea
-          id={inputId}
-          value={reportJson}
-          onChange={(event) => setReportJson(event.target.value)}
-          rows={14}
-          spellCheck={false}
-          className="field mt-3 resize-y font-mono text-xs leading-5"
-        />
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button type="button" className="btn btn-primary" onClick={handleVerify} disabled={pending}>
-            <ShieldCheck aria-hidden="true" className="size-4" />
+      <div className="grid content-start gap-4 sm:gap-5">
+        <StepCard step={1} title="Get the report">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
+            onChange={handleFile}
+          />
+          <button
+            type="button"
+            className="btn min-h-13 w-full border-ice-300/60 text-base"
+            onClick={() => fileRef.current?.click()}
+            disabled={pending}
+          >
+            <FileUp aria-hidden="true" className="size-5 text-ice-300" />
+            Choose file
+          </button>
+
+          <label htmlFor={inputId} className="eyebrow mt-4 block">
+            Or paste the signed report (JSON)
+          </label>
+          <textarea
+            id={inputId}
+            value={reportJson}
+            onChange={(event) => {
+              setReportJson(event.target.value)
+              setSource(null)
+            }}
+            rows={7}
+            spellCheck={false}
+            placeholder="Paste the report here"
+            className="field mt-1.5 resize-y font-mono text-xs leading-5"
+          />
+          <p role="status" aria-live="polite" className="mt-1.5 min-h-5 text-sm text-fg-muted">
+            {source}
+          </p>
+
+          {sampleReportJson !== undefined && (
+            <div className="ig-demo mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 p-3">
+              <span className="ig-demo-tag">
+                <FlaskConical aria-hidden="true" className="size-3.5" />
+                Demo
+              </span>
+              <p className="min-w-0 flex-1 basis-40 text-sm leading-5 text-fg-muted">
+                No file at hand? Use this crew&rsquo;s current report.
+              </p>
+              <button
+                type="button"
+                className="btn min-h-12 w-full sm:w-auto"
+                onClick={() => {
+                  setReportJson(sampleReportJson)
+                  setSource('Sample report loaded.')
+                }}
+                disabled={pending}
+              >
+                Load sample report
+              </button>
+            </div>
+          )}
+        </StepCard>
+
+        <StepCard step={2} title="Verify">
+          <button
+            type="button"
+            className="btn btn-primary min-h-16 w-full text-lg"
+            onClick={handleVerify}
+            disabled={pending}
+          >
+            <ShieldCheck aria-hidden="true" className="size-6" />
             {pending ? 'Verifying…' : 'Verify report'}
           </button>
-          {sampleReportJson !== undefined && (
-            <button
-              type="button"
-              className="btn"
-              onClick={() => setReportJson(sampleReportJson)}
-              disabled={pending}
-            >
-              Load sample report
-            </button>
-          )}
-        </div>
+          <p className="mt-2 text-sm leading-5 text-fg-muted">
+            {empty
+              ? 'Add a report in step 1 first.'
+              : 'Checks the hash chain, the seal and the signature.'}
+          </p>
+        </StepCard>
       </div>
 
-      <div className="glass p-5">
-        <p className="eyebrow">Result</p>
+      <div ref={resultRef} className="scroll-mt-28">
+        <StepCard step={3} title="Read the result" className="h-full">
+          {outcome === null && (
+            <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-line-strong px-4 py-10 text-center">
+              <ShieldCheck aria-hidden="true" className="size-12 text-fg-dim" strokeWidth={1.5} />
+              <p className="font-display text-xl leading-7 font-semibold text-fg">No result yet</p>
+              <p className="max-w-xs text-sm leading-5 text-fg-muted sm:text-base">
+                The verdict appears here: record intact, or tampering detected.
+              </p>
+            </div>
+          )}
 
-        {outcome === null && (
-          <ol className="mt-3 space-y-3">
-            {STEPS.map((step, index) => (
-              <li key={step} className="flex items-start gap-3 text-sm text-fg-muted">
-                <span
-                  aria-hidden="true"
-                  className="num flex size-7 shrink-0 items-center justify-center rounded-full border border-line-strong font-mono text-xs font-semibold text-ice-200"
-                >
-                  {index + 1}
-                </span>
-                <span className="pt-1">{step}</span>
-              </li>
-            ))}
-          </ol>
-        )}
+          {outcome?.kind === 'error' && (
+            <div
+              role="alert"
+              className="flex items-start gap-4 rounded-3xl border border-alert/60 bg-alert/12 p-4 sm:p-5"
+            >
+              <span
+                aria-hidden="true"
+                className="ig-octagon flex size-14 shrink-0 items-center justify-center bg-alert text-2xl font-bold text-space-950"
+              >
+                !
+              </span>
+              <div className="min-w-0">
+                <p className="font-display text-2xl leading-8 font-semibold text-alert-soft">
+                  Could not read the report
+                </p>
+                <p className="mt-1 text-sm leading-5 [overflow-wrap:anywhere] text-fg sm:text-base">
+                  {outcome.message}
+                </p>
+              </div>
+            </div>
+          )}
 
-        {outcome?.kind === 'error' && (
-          <div
-            role="alert"
-            className="mt-3 rounded-2xl border border-alert/55 bg-alert/14 p-4 text-sm text-alert-soft"
-          >
-            <p className="font-semibold">Could not verify the report</p>
-            <p className="mt-1 break-words text-fg">{outcome.message}</p>
-          </div>
-        )}
-
-        {outcome?.kind === 'result' && (
-          <div className="mt-3 space-y-4">
-            <VerificationResult verification={outcome.verification} />
-            <ChainOrbit verification={outcome.verification} entryCount={entryCount} />
-          </div>
-        )}
+          {outcome?.kind === 'result' && (
+            <div className="space-y-4">
+              <VerificationResult verification={outcome.verification} />
+              <ChainOrbit verification={outcome.verification} entryCount={entryCount} />
+            </div>
+          )}
+        </StepCard>
       </div>
     </section>
   )

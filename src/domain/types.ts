@@ -8,6 +8,26 @@ export type SystemId = 'neuro' | 'cardio' | 'metabolic' | 'musculoskeletal' | 'r
 export type Status = 'green' | 'amber' | 'red'
 export type ReadingSource = 'manual' | 'band' | 'nasa-dataset'
 
+/** One step of a quick-response checklist, with the time it was marked done. */
+export interface ActionEventStep {
+  text: string
+  doneAt?: string // ISO 8601
+}
+
+/**
+ * Event record: the steps the crew followed for one body system, with times.
+ * It travels inside a Reading, so it enters the hash chain and the signed report
+ * with no change to the crypto layer.
+ */
+export interface ActionEvent {
+  system: SystemId
+  status: Exclude<Status, 'green'>
+  distance: Distance
+  title: string
+  steps: ActionEventStep[]
+  savedAt: string // ISO 8601
+}
+
 export interface Reading {
   id: string
   date: string // ISO 8601
@@ -23,6 +43,8 @@ export interface Reading {
   source: ReadingSource
   /** Marcado por plausibility.ts antes del cálculo del semáforo. */
   integrity?: 'ok' | 'doubtful'
+  /** Present only on entries that record a quick-response event. */
+  event?: ActionEvent
 }
 
 /** Línea base personal (p. ej. media/desvío de los primeros 14 días). */

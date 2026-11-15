@@ -14,17 +14,19 @@ export function CheckRow({ label, ok }: CheckRowProps) {
   const Icon = ok ? Check : X
 
   return (
-    <li className="well flex items-center gap-3 px-3 py-2.5">
+    <li className="well flex min-h-14 items-center gap-3 px-3 py-2.5">
       <span
         aria-hidden="true"
-        className={`flex size-7 shrink-0 items-center justify-center rounded-full border ${
-          ok ? 'border-ok/45 bg-ok/12 text-ok' : 'border-alert/55 bg-alert/14 text-alert'
+        className={`flex size-8 shrink-0 items-center justify-center border ${
+          ok
+            ? 'rounded-full border-ok/50 bg-ok/14 text-ok'
+            : 'rounded-md border-alert/60 bg-alert/16 text-alert'
         }`}
       >
-        <Icon className="size-4" strokeWidth={2.5} />
+        <Icon className="size-4.5" strokeWidth={2.75} />
       </span>
       <span className="flex min-w-0 flex-col">
-        <span className="text-sm text-fg">{label}</span>
+        <span className="text-sm leading-5 font-medium text-fg">{label}</span>
         <span
           className={`text-xs font-semibold tracking-[0.1em] uppercase ${
             ok ? 'text-ok' : 'text-alert'

@@ -1,30 +1,32 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import {
-  ClipboardCheck,
+  House,
   LayoutDashboard,
   RadioTower,
   RotateCcw,
   ShieldCheck,
   type LucideIcon,
 } from 'lucide-react'
-import type { Distance, Reading } from './domain/types'
+import type { Distance } from './domain/types'
+import { useActionStore } from './store/action-store'
 import { useAppStore } from './store/app-store'
 import { useIntegrityStore } from './store/integrity-store'
+import { useUiStore, type Tab } from './store/ui-store'
 import { SpaceBackdrop, BACKDROP_FOCUS_ATTR } from './ui/backdrop/SpaceBackdrop'
 import { BrandMark } from './ui/components/BrandMark'
 import { formatLatency } from './ui/components/format'
 import { OfflineStatus } from './ui/components/OfflineStatus'
-import { DailyCheckForm } from './ui/daily-check/DailyCheckForm'
+import { SafeBoundary } from './ui/components/SafeBoundary'
 import { Dashboard } from './ui/dashboard/Dashboard'
+import { HomeFlow } from './ui/flow/HomeFlow'
+import { reportFilename, reportToJson } from './ui/integrity/export'
 import { IntegrityPanel } from './ui/integrity/IntegrityPanel'
 import { GroundVerifier } from './ui/verifier/GroundVerifier'
 import { verifyReportJson } from './crypto/parse-report'
 
-type Tab = 'dashboard' | 'check' | 'integrity' | 'ground'
-
 const TABS: { id: Tab; label: string; icon: LucideIcon }[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'check', label: 'Daily check', icon: ClipboardCheck },
+  { id: 'home', label: 'Home', icon: House },
+  { id: 'details', label: 'Details', icon: LayoutDashboard },
   { id: 'integrity', label: 'Integrity', icon: ShieldCheck },
   { id: 'ground', label: 'Ground Control', icon: RadioTower },
 ]
@@ -52,10 +54,11 @@ const VIEWS: Record<Distance, { title: string; caption: string }> = {
 }
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>('dashboard')
-  const { readings, triage, distance, setDistance, addReading, resetDemo } = useAppStore()
+  const tab = useUiStore((s) => s.tab)
+  const setTab = useUiStore((s) => s.setTab)
+  const go = useUiStore((s) => s.go)
+  const { readings, triage, distance, setDistance, resetDemo } = useAppStore()
   const initIntegrity = useIntegrityStore((s) => s.init)
-  const addToChain = useIntegrityStore((s) => s.addReading)
   const integrity = useIntegrityStore()
 
   // Sella el historial sintético inicial al arrancar la app.
@@ -63,29 +66,30 @@ export default function App() {
     void initIntegrity(useAppStore.getState().readings)
   }, [initIntegrity])
 
-  const handleSubmit = (r: Reading) => {
-    addReading(r)
-    void addToChain(r)
-    setTab('dashboard')
-  }
-
   const handleReset = () => {
     resetDemo()
+    useActionStore.getState().reset()
+    go({ name: 'home' })
     void initIntegrity(useAppStore.getState().readings)
   }
 
   const view = VIEWS[distance]
+  // What the crew would send to ground: the signed report with the entries as they are
+  // stored right now (so a tampered record is rejected by Ground Control).
+  const outgoing = integrity.report ? { ...integrity.report, entries: integrity.stored } : null
 
   return (
     <div className="relative isolate min-h-screen text-fg">
-      <SpaceBackdrop distance={distance} />
+      <SafeBoundary>
+        <SpaceBackdrop distance={distance} />
+      </SafeBoundary>
       <a href="#main" className="skip-link">
         Skip to content
       </a>
 
-      <div className="relative z-10 flex min-h-screen flex-col pb-24 md:pb-0">
-        {/* Top bar. On phones the section nav is a fixed bottom bar, so this wrapper
-            must not create a containing block (no filter/transform below md). */}
+      <div className="relative z-10 flex min-h-screen flex-col pb-20 md:pb-0">
+        {/* Top bar. On phones the section nav sits under the title (not at the bottom),
+            so the host's floating badge never covers it; pb-20 leaves room for that badge. */}
         <div className="z-40 border-b border-line bg-space-950/75 md:sticky md:top-0 md:bg-space-950/78 md:backdrop-blur-xl md:backdrop-saturate-150">
           <div className="mx-auto grid max-w-[76rem] gap-x-6 gap-y-3 px-4 py-3 sm:px-6 md:grid-cols-[1fr_auto] md:items-center">
             <header className="flex items-center gap-3">
@@ -102,7 +106,7 @@ export default function App() {
 
             <nav
               aria-label="Main sections"
-              className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-line bg-space-950/90 px-1 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:static md:col-span-2 md:row-start-2 md:flex md:gap-1 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none"
+              className="grid grid-cols-4 gap-1 rounded-2xl border border-line bg-space-900/70 p-1 md:col-span-2 md:row-start-2 md:flex md:rounded-none md:border-0 md:bg-transparent md:p-0"
             >
               {TABS.map((t) => {
                 const current = tab === t.id
@@ -197,16 +201,22 @@ export default function App() {
 
         <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[76rem] flex-1 px-4 py-5 outline-none sm:px-6">
           <div key={tab} className="motion-safe:animate-rise">
-            {tab === 'dashboard' && triage && (
-              <Dashboard key={`${triage.generatedAt}-${distance}`} triage={triage} />
+            {tab === 'home' && <HomeFlow />}
+            {tab === 'details' && triage && (
+              <Dashboard
+                key={`${triage.generatedAt}-${distance}`}
+                triage={triage}
+                onNavigate={(t) => (t === 'check' ? go({ name: 'checkin' }) : setTab(t))}
+              />
             )}
-            {tab === 'check' && <DailyCheckForm onSubmit={handleSubmit} />}
             {tab === 'integrity' && (
               <IntegrityPanel
                 verification={integrity.verification}
                 sealCode={integrity.code}
                 tampered={integrity.tampered}
                 entryCount={integrity.stored.length}
+                reportJson={outgoing ? reportToJson(outgoing) : null}
+                reportFilename={outgoing ? reportFilename(outgoing) : undefined}
                 onTamper={(kind) => void integrity.simulateTamper(kind)}
                 onRestore={() => void integrity.restore()}
                 onVerify={() => void integrity.verify()}
@@ -215,7 +225,7 @@ export default function App() {
             {tab === 'ground' && (
               <GroundVerifier
                 onVerify={verifyReportJson}
-                sampleReportJson={integrity.report ? JSON.stringify(integrity.report, null, 2) : undefined}
+                sampleReportJson={outgoing ? reportToJson(outgoing) : undefined}
               />
             )}
           </div>

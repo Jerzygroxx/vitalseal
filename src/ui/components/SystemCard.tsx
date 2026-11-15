@@ -10,6 +10,10 @@ export interface SystemCardProps {
   system: SystemStatus
   /** `compact` omite la evidencia y usa un medidor lineal (rejilla de sistemas). */
   variant?: 'detail' | 'compact'
+  /** Hide the generic action block (the quick-response checklist replaces it). Default true. */
+  showAction?: boolean
+  /** Replaces the generic action sentence, e.g. with the first step of the checklist. */
+  actionText?: string
 }
 
 const isExternalLink = (value: string): boolean => value.startsWith('https://')
@@ -21,7 +25,12 @@ const RING_LENGTH = 2 * Math.PI * RING_R
  * Detalle de un sistema (T-02): etiqueta, semáforo, score, indicadores fuera
  * de rango, acción concreta y evidencia. Componente de presentación puro.
  */
-export function SystemCard({ system, variant = 'detail' }: SystemCardProps) {
+export function SystemCard({
+  system,
+  variant = 'detail',
+  showAction = true,
+  actionText,
+}: SystemCardProps) {
   const titleId = useId()
   const hasIndicators = system.indicators.length > 0
   const tone = STATUS_TONES[system.status]
@@ -112,18 +121,20 @@ export function SystemCard({ system, variant = 'detail' }: SystemCardProps) {
         )}
       </section>
 
-      <section
-        className={`${compact ? 'mt-3' : 'well mt-5 border-l-2 border-l-ice-400 p-3.5'}`}
-        aria-label="Recommended action"
-      >
-        <h4 className="eyebrow flex items-center gap-1.5">
-          {!compact && <ArrowRight aria-hidden="true" className="size-3.5 text-ice-300" />}
-          Action
-        </h4>
-        <p className={`mt-1.5 text-fg ${compact ? 'text-sm' : 'text-[0.9375rem] leading-6'}`}>
-          {system.action}
-        </p>
-      </section>
+      {showAction && (
+        <section
+          className={`${compact ? 'mt-3' : 'well mt-5 border-l-2 border-l-ice-400 p-3.5'}`}
+          aria-label="Recommended action"
+        >
+          <h4 className="eyebrow flex items-center gap-1.5">
+            {!compact && <ArrowRight aria-hidden="true" className="size-3.5 text-ice-300" />}
+            Action
+          </h4>
+          <p className={`mt-1.5 text-fg ${compact ? 'text-sm' : 'text-[0.9375rem] leading-6'}`}>
+            {actionText ?? system.action}
+          </p>
+        </section>
+      )}
 
       {!compact && <HrpContext systemId={system.id} />}
 
