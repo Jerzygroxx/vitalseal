@@ -124,7 +124,7 @@ export function HomeScreen({
                 I&rsquo;m fine
               </span>
               <span className="block text-sm leading-5 font-medium text-space-800 sm:text-base">
-                Quick check, 1 minute
+                Quick check, 8 questions
               </span>
             </span>
             <ChevronRight aria-hidden="true" className="size-6 shrink-0" />
