@@ -13,6 +13,7 @@ import { useIntegrityStore } from './store/integrity-store'
 import { SpaceBackdrop, BACKDROP_FOCUS_ATTR } from './ui/backdrop/SpaceBackdrop'
 import { BrandMark } from './ui/components/BrandMark'
 import { formatLatency } from './ui/components/format'
+import { OfflineStatus } from './ui/components/OfflineStatus'
 import { DailyCheckForm } from './ui/daily-check/DailyCheckForm'
 import { Dashboard } from './ui/dashboard/Dashboard'
 import { IntegrityPanel } from './ui/integrity/IntegrityPanel'
@@ -222,9 +223,12 @@ export default function App() {
 
         <footer className="mx-auto w-full max-w-[76rem] px-4 pb-6 sm:px-6">
           <div className="glass space-y-1.5 px-4 py-3 text-xs leading-5 text-fg-muted">
-            <p className="font-medium text-fg">
-              Research prototype, not a medical device. Not affiliated with NASA.
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-medium text-fg">
+                Research prototype, not a medical device. Not affiliated with NASA.
+              </p>
+              <OfflineStatus />
+            </div>
             <p>
               <span className="num">{readings.length}</span> synthetic demo readings loaded. Not real
               astronaut data.

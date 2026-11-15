@@ -14,3 +14,4 @@
 | 14-nov 13:50 | Claude Code | Claude Sonnet 5.5 | parse-report (verificador), pestañas Integrity y Ground Control en App.tsx, auditoría G1/G2 | Jorge (pendiente) |
 | 14-nov 14:25 | Claude Code (subagente de diseño) | Fable | Rediseño visual completo: tokens, fondo de la Tierra generativo (Canvas 2D), body map, órbita de integridad, layout. Dirección creativa: Jorge. Imagen de referencia solo para estilo | Claude Code (verificado: 96 tests, build) + Jorge (pendiente) |
 | 14-nov 15:50 | Claude Code + Fable (subagente de diseño) | Claude Sonnet 5.5 / Fable | Rama experimental de rediseño simplificado y sensor-primero: probada y DESCARTADA por Jorge (no se integró código) | Jorge |
+| 15-nov 09:55 | Claude Code | Claude Sonnet 5.5 | Modo offline: service worker generado en el build, manifest, íconos originales (SVG→PNG con cairosvg), indicador de estado, _headers para Netlify y prueba real con Edge headless; checklist del proyecto | Jorge (pendiente) |
