@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { ArrowRight } from 'lucide-react'
 import type { SystemStatus } from '../../domain/types'
+import { HrpContext } from './HrpContext'
 import { StatusBadge } from './StatusBadge'
 import { STATUS_TONES } from './status-tone'
 import { SYSTEM_ICONS } from './system-icons'
@@ -123,6 +124,8 @@ export function SystemCard({ system, variant = 'detail' }: SystemCardProps) {
           {system.action}
         </p>
       </section>
+
+      {!compact && <HrpContext systemId={system.id} />}
 
       {!compact && system.evidence.length > 0 && (
         <section className="mt-5" aria-label="Evidence">
