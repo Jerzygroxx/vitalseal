@@ -28,7 +28,9 @@ Note: the AES-GCM vault is implemented and unit-tested as a module, but it is no
 4. **Weak passphrases.** PBKDF2 slows guessing but cannot save a guessable passphrase.
 5. **Public key trust.** The report carries its own public key, so a verifier must obtain that key (or its fingerprint) through a separate trusted channel to rule out a full replacement of the report.
 6. **Availability.** Deleting the whole vault destroys the data; the system detects tampering, it does not prevent destruction.
-7. **Clinical validity.** Thresholds are reference ranges for a prototype and are not clinically validated.
+7. **Clinical validity.** Thresholds are reference ranges for a prototype and are not clinically validated. The same applies to the step-by-step action lists: they are general first-aid-level text, not validated by a flight surgeon.
+8. **What an event record proves.** An emergency event saved to the chain records which steps the crew ticked and when, using the device clock. It proves the record was not changed afterwards. It does not prove a step was actually done, and the clock itself is not trusted time.
+9. **Transport of the report.** The app exports the signed report as a JSON file (download or copy). It does not send it. Delivery to ground depends on the mission's own data link, and a report that never arrives, or arrives late, is not detected by the app. The short seal code is meant to travel separately so ground can compare both.
 
 ## Demo data
 

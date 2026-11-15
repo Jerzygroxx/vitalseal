@@ -42,7 +42,6 @@ Versions are pinned in `package.json`. Licenses were read from each installed pa
 | react, react-dom | 19.3.1 | MIT | UI framework |
 | zustand | 5.1.0 | MIT | State management |
 | lucide-react | 1.73.0 | ISC | Icons |
-| recharts | 3.10.1 | MIT | Listed as a dependency; not used by the current interface |
 | vite | 8.3.8 | MIT | Build tool |
 | @vitejs/plugin-react | 6.3.0 | MIT | React support for Vite |
 | tailwindcss, @tailwindcss/vite | 4.3.5 | MIT | Styling |

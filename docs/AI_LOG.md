@@ -23,6 +23,14 @@ Tools: **Claude Code** (Anthropic, model Claude Sonnet 5.5), **OpenCode** with D
 | 15 Nov 10:40 | OpenCode | DeepSeek | Read-only audit of the repository before publishing (no code changed) | Claude Code; team review pending |
 | 15 Nov 11:00 | Claude Code | Claude Sonnet 5.5 | Production deploy, screenshots of the deployed app, demo deck (7 slides) built with Claude's slide tool, submission guide for the team | Team review pending |
 | 15 Nov 11:40 | Claude Code | Claude Sonnet 5.5 | Public release branch: README, REFERENCES, this log in English, radiation levels relabeled as illustrative | Team review pending |
+| 15 Nov 12:30 | Claude Code | Claude Sonnet 5.5 | Fix for the mobile navigation hidden by the host's floating badge; 30 s demo video (screen capture of the app, assembled with ffmpeg) and its narration script | Team review pending |
+| 15 Nov 12:45 | Claude Code | Claude Sonnet 5.5 | Narration audio of the demo video: generic synthetic voice (Microsoft Zira, built-in Windows text-to-speech), not a human recording | Team review pending |
+| 15 Nov 13:15 | Claude Code | Claude Sonnet 5.5 | Version 2: action playbooks (general first-aid-level text with official source links, no drugs or doses), event record added to the hash chain, guided flow and navigation state, with tests | Team review pending; steps not validated by a flight surgeon |
+| 15 Nov 13:40 | OpenCode | DeepSeek | Action plan checklist card (T-05) and the check-in wizard, one question per screen (T-06), with tests; both reviewed by Claude Code (typecheck, tests, scope check) | Claude Code (approved); team review pending |
+| 15 Nov 14:00 | Fable | Claude Fable 5.2 | Home screen redesign (T-07): guided question, three big answers, status ring | Claude Code (typecheck, tests, screenshots); team review pending |
+| 15 Nov 14:50 | Claude Code | Claude Sonnet 5.5 | Fix for a blank screen when the page loads with a zero-size viewport (error boundary around the decorative backdrop); "Send to ground" export (download or copy the signed report) with tests | Team review pending |
+| 15 Nov 15:30 | Fable | Claude Fable 5.2 | Integrity and Ground Control redesign (T-08): verdict first, three-step flow, file loading | Claude Code (typecheck, tests, tamper round trip in the browser); team review pending |
+| 15 Nov 15:50 | Claude Code | Claude Sonnet 5.5 | Version 2 published as the live app; repository updated to match; unused dependency (recharts) removed | Team review pending |
 
 ## What AI was and was not used for
 

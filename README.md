@@ -24,9 +24,15 @@ There is a second problem that health tools tend to ignore: **the record itself 
 
 | Pillar | What it does |
 |---|---|
-| **Assess** | A five-minute daily check with eight indicators: heart rate, blood pressure (systolic and diastolic), SpO2, body temperature, sleep, mood, symptoms and cumulative radiation dose. Every field is range-validated and usable by keyboard. |
-| **Decide** | Each reading is compared with reference limits and with the person's own baseline (the first 14 readings). The result is a green, amber or red status for five body systems, shown with color, icon and text, plus a suggested next step. |
-| **Trust** | Every reading joins a SHA-256 hash chain and the daily report is signed with ECDSA P-256 using a non-extractable key. A short seal code can be sent to Earth. An integrity panel verifies the chain, and a Ground Control verifier checks a pasted signed report on its own. |
+| **Assess** | A short daily check, one question per screen, with eight indicators: heart rate, blood pressure (systolic and diastolic), SpO2, body temperature, sleep, mood, symptoms and cumulative radiation dose. Every field is range-validated, has large touch targets and is usable by keyboard. |
+| **Decide** | Each reading is compared with reference limits and with the person's own baseline (the first 14 readings). The result is a green, amber or red status for five body systems, shown with color, icon and text, plus step-by-step actions to follow now and when to contact ground. |
+| **Trust** | Every reading and every emergency event joins a SHA-256 hash chain and the daily report is signed with ECDSA P-256 using a non-extractable key. A short seal code can be sent to Earth, and the signed report can be downloaded as a JSON file. An integrity panel verifies the chain, and a Ground Control verifier checks a signed report on its own. |
+
+### Guided assistant and action plans
+
+The Home screen asks one question, "How do you feel today?", with three big answers: **I'm fine** (quick check), **Something feels off** and **Emergency**. The last two lead to a short list of steps for the affected body system. Each step can be ticked, and the app stores the time it was ticked. **Save event record** adds the whole event (system, status, distance, steps and times) to the tamper-evident chain, so it is part of the next signed report.
+
+The step lists are general first-aid-level guidance written for this prototype, with links to NASA and CSA pages. They contain no drugs or doses. **They are not validated by a flight surgeon, and they do not replace onboard medical procedures or instructions from ground, which always take priority.** What the event record proves is that the crew marked a step at a given time on the device clock. It does not prove the step was carried out.
 
 ### Distance-aware escalation
 
@@ -40,7 +46,7 @@ The next step depends on how far the crew is, because delay changes what is poss
 
 ### Tamper demo
 
-The Integrity tab has demo buttons that simulate an attacker editing the stored record: **alter a reading**, **reorder entries** or **delete an entry**. The hash chain breaks at the first inconsistent entry and the panel flags it. **Restore data** undoes the simulation. The **Ground Control** tab verifies a signed report from scratch.
+The Integrity tab has demo buttons that simulate an attacker editing the stored record: **alter a reading**, **reorder entries** or **delete an entry**. The hash chain breaks at the first inconsistent entry and the panel flags it. **Restore data** undoes the simulation. **Download signed report** (or **Copy report**) exports what is stored right now as JSON, so a tampered record can be sent to the **Ground Control** tab, which loads the file or the pasted text and verifies it from scratch. The app produces the file only: it has no transmission channel, which on a mission would be the vehicle's own data link.
 
 ### Official sources in the app
 
@@ -67,11 +73,11 @@ A single-page web app with **no backend**. All health data stays in the browser.
 
 ```
 src/
-  domain/   types, thresholds, personal baseline, rules, escalation, official-source evidence
+  domain/   types, thresholds, personal baseline, rules, escalation, official-source evidence, action playbooks, event record
   crypto/   hash chain, signing, verification, seal code, encrypted vault, report parser
   data/     seeded synthetic data generator
-  store/    Zustand stores (app state, integrity state)
-  ui/       daily check, dashboard, body map, integrity panel, verifier, backdrop, shared components
+  store/    Zustand stores (app state, integrity state, action checklist, navigation)
+  ui/       home, guided flow, check-in wizard, action plans, dashboard, body map, integrity panel, verifier, backdrop, shared components
   pwa/      service worker generator, registration, offline status
 ```
 
@@ -95,7 +101,7 @@ Requires Node.js 22 or newer.
 ```bash
 npm install
 npm run dev        # development server
-npm test           # 110 unit tests (domain, crypto and tamper cases, UI helpers)
+npm test           # 165 unit tests (domain, crypto and tamper cases, UI helpers)
 npm run typecheck  # strict TypeScript
 npm run build      # production build in dist/
 npm run preview    # serve the production build
@@ -116,12 +122,15 @@ NASA does not provide a raw dataset for this challenge. We used the Human Resear
 - This repository was created on 12 November 2026 for team planning. Before the hackathon it held only planning notes and an internal team presentation. **No application code existed before 14 November 2026.** The application was written on 14 and 15 November 2026, and the commit history shows it.
 - AI tools were used as development assistants and are listed, with what each did, in [`docs/AI_LOG.md`](docs/AI_LOG.md). Commit prefixes mark the author tool: `[cc]` Claude Code, `[oc]` OpenCode with DeepSeek, `[fable]` the design assistant.
 - The Earth background, the body map and the slide backgrounds are illustrations drawn by code with AI assistance. They are credited in the app footer. They are not photographs.
+- The narration of the demo video is a generic synthetic voice (the built-in Microsoft Zira text-to-speech voice of Windows), not a recording of a person.
 
 ## Limitations
 
 - Research prototype, not a medical device, and not clinically validated.
 - The seal detects changes after a record is created. It does not prove a sensor measured the truth at the source.
 - Reference ranges are general clinical references, not NASA limits.
+- The action steps are general first-aid-level text, not validated by a flight surgeon. Onboard procedures and ground instructions take priority.
+- The signed report is exported as a file. The app has no communication channel of its own.
 - No real wearable or sensor integration. Readings are entered by hand or come from the synthetic generator.
 - Next steps: a trends view with the personal baseline band, connecting the encrypted vault to the interface, physiological plausibility checks between indicators, and usability testing with adult volunteers.
 
